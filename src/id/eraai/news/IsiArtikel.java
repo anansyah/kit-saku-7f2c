@@ -33,6 +33,8 @@ final class IsiArtikel {
             Pattern.compile("<img\\b[^>]*>", Pattern.CASE_INSENSITIVE);
     private static final Pattern P_KOSONG =
             Pattern.compile("<p>\\s*(?:<br\\s*/?>)?\\s*</p>", Pattern.CASE_INSENSITIVE);
+    private static final Pattern TAG =
+            Pattern.compile("<[^>]+>", Pattern.CASE_INSENSITIVE);
 
     /** Badan artikel (HTML) dengan penyeimbang tag div. */
     static String ambil(String halaman) {
@@ -146,6 +148,36 @@ final class IsiArtikel {
             if (sb.length() > 60) break;
         }
         return sb.toString();
+    }
+
+    /**
+     * Suling badan artikel (HTML) jadi teks polos untuk mesin suara:
+     * buang semua tag, susun ulang jadi kalimat, buang jejak kredit
+     * dan tautan sumber yang tidak layak dibacakan.
+     */
+    static String teksBersih(String html) {
+        if (html == null) return "";
+        String t = html;
+        // blok yang tidak layak dibaca
+        t = DIV_KREDIT.matcher(t).replaceAll(" ");
+        t = t.replaceAll("(?is)<div[^>]*class=[\"'][^\"']*(?:gambar-berita|sumber)[^\"']*[\"'][^>]*>.*?</div>", " ");
+        // ganti elemen blok jadi jeda supaya kalimat tidak menempel
+        t = t.replaceAll("(?i)</(p|h1|h2|h3|h4|li|blockquote|div)>", ". ");
+        t = t.replaceAll("(?i)<br\s*/?>", ". ");
+        t = TAG_IMG.matcher(t).replaceAll(" ");
+        t = TAG.matcher(t).replaceAll(" ");
+        // entitas yang lazim
+        t = t.replace("&#8212;", "—").replace("&#8211;", "–")
+             .replace("&#8217;", "'").replace("&#8216;", "'")
+             .replace("&#8220;", "\"").replace("&#8221;", "\"")
+             .replace("&#8230;", "…").replace("&hellip;", "…")
+             .replace("&nbsp;", " ").replace("&amp;", "&")
+             .replace("&lt;", "<").replace("&gt;", ">")
+             .replace("&#39;", "'").replace("&quot;", "\"");
+        // perbaiki jeda ganda
+        t = t.replaceAll("\s*\.\s*\.", ".").replaceAll("\.\s*\.", ".");
+        t = t.replaceAll("[ \t]+", " ").trim();
+        return t;
     }
 
     private static String rapikan(String t) {

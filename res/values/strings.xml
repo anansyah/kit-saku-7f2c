@@ -22,4 +22,13 @@
     <string name="ukuran">Aa</string>
     <string name="tema_auto">Tema: Otomatis</string>
     <string name="kembali">Kembali</string>
+    <string name="dengar">Dengarkan</string>
+    <string name="berhenti">Berhenti</string>
+    <string name="suara_tak_ada">Mesin suara tidak tersedia di HP ini</string>
+    <string name="terjemah">Terjemah</string>
+    <string name="menerjemahkan">Menerjemahkan…</string>
+    <string name="terjemah_gagal">Terjemahan gagal. Periksa sambungan internet.</string>
+    <string name="asli">Teks asli</string>
+    <string name="pilih_bahasa">Terjemahkan ke</string>
+    <string name="bahasa_kini">Bahasa: %1$s</string>
 </resources>

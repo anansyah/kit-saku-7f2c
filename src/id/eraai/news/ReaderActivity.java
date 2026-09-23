@@ -34,6 +34,15 @@ public class ReaderActivity extends Activity {
     private int ukuran = 17;
     private boolean modeBaca = true;
     private boolean gelap = true;
+    private Bicara suara;
+    private TextView tombolDengar;
+    private TextView tombolTerjemah;
+    private String teksBacaan = "";
+    private String bahasa = "id";        // "id" = teks asli
+    private String badanTampil = null;    // yang sedang tampil (bisa hasil terjemahan)
+    private String badanAsli = null;      // simpan versi asli supaya bisa kembali
+    private String gambarAsli = null;
+    private String kreditAsli = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,6 +64,41 @@ public class ReaderActivity extends Activity {
         ((TextView) findViewById(R.id.tombol_browser)).setTextColor(Tampilan.teks2(gelap));
         getWindow().setStatusBarColor(Tampilan.bg(gelap));
         getWindow().setNavigationBarColor(Tampilan.bg(gelap));
+
+        tombolDengar = findViewById(R.id.tombol_dengar);
+        tombolDengar.setTextColor(Tampilan.aksenTeks(gelap));
+        tombolDengar.setBackground(Tampilan.kotak(
+                android.graphics.Color.TRANSPARENT, Tampilan.garis(gelap), 20));
+        tombolDengar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                alihsuara();
+            }
+        });
+        suara = new Bicara(this, new Bicara.Siap() {
+            @Override
+            public void hasil(boolean bisa) {
+                if (!bisa) {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            tombolDengar.setVisibility(View.GONE);
+                        }
+                    });
+                }
+            }
+        });
+
+        tombolTerjemah = findViewById(R.id.tombol_terjemah);
+        tombolTerjemah.setTextColor(Tampilan.aksenTeks(gelap));
+        tombolTerjemah.setBackground(Tampilan.kotak(
+                android.graphics.Color.TRANSPARENT, Tampilan.garis(gelap), 20));
+        tombolTerjemah.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                pilihBahasa();
+            }
+        });
 
         TextView labelSumber = findViewById(R.id.label_sumber);
         labelSumber.setText(judul == null ? getString(R.string.sumber) : judul);
@@ -124,7 +168,8 @@ public class ReaderActivity extends Activity {
             public void onClick(View v) {
                 ukuran = ukuran >= 24 ? 15 : ukuran + 3;
                 Toast.makeText(ReaderActivity.this, "Ukuran huruf " + ukuran, Toast.LENGTH_SHORT).show();
-                if (halaman != null) tampilkanBaca(halaman);
+                // gambar ulang dengan bahasa yang sedang dipakai
+                if (badanAsli != null) terapkanBahasa(bahasa);
             }
         });
 
@@ -166,9 +211,10 @@ public class ReaderActivity extends Activity {
                 if (kreditArtikel == null || kreditArtikel.length() == 0) {
                     kreditArtikel = IsiArtikel.kredit(b.isi);
                 }
-                String html = IsiArtikel.bungkus(judul, badanArtikel, gambarArtikel,
-                        kreditArtikel, ukuran, tautan, labelArtikel, gelap);
-                web.loadDataWithBaseURL(tautan, html, "text/html", "UTF-8", null);
+                badanAsli = badanArtikel;
+                gambarAsli = gambarArtikel;
+                kreditAsli = kreditArtikel;
+                tampilkanBacaLengkap(badanArtikel, gambarArtikel, kreditArtikel, labelArtikel);
                 return;
             }
         }
@@ -201,6 +247,96 @@ public class ReaderActivity extends Activity {
         tombolSimpan.setText(Simpan.ada(this, tautan) ? R.string.disimpan : R.string.simpan);
     }
 
+    /** Alih-alih dengarkan/berhenti. */
+    private void alihsuara() {
+        if (suara == null) return;
+        if (suara.sedangJalan()) {
+            suara.stop();
+            tombolDengar.setText(R.string.dengar);
+            return;
+        }
+        boolean ok = suara.mulai(judul, teksBacaan);
+        if (ok) {
+            tombolDengar.setText(R.string.berhenti);
+        } else if (suara.tidakAda()) {
+            Toast.makeText(this, R.string.suara_tak_ada, Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    /** Pilih bahasa terjemahan (daftar sama seperti di website). */
+    private void pilihBahasa() {
+        final String[] nama = new String[Terjemah.NAMA.length];
+        for (int i = 0; i < nama.length; i++) nama[i] = Terjemah.NAMA[i];
+        new android.app.AlertDialog.Builder(this)
+                .setTitle(R.string.pilih_bahasa)
+                .setItems(nama, new android.content.DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(android.content.DialogInterface d, int pos) {
+                        terapkanBahasa(Terjemah.KODE[pos]);
+                    }
+                })
+                .show();
+    }
+
+    /** Tampilkan artikel dalam bahasa terpilih ("id" = asli). */
+    private void terapkanBahasa(final String kode) {
+        if (badanAsli == null) return;
+        if (kode.equals(bahasa) && badanTampil != null) {
+            // bahasa sama -> cukup gambar ulang (mis. setelah ganti ukuran huruf)
+            tampilkanBacaLengkap(badanTampil, gambarAsli, kreditAsli, labelArtikel);
+            return;
+        }
+        bahasa = kode;
+        tombolTerjemah.setText("id".equals(kode)
+                ? getString(R.string.terjemah) : Terjemah.nama(kode));
+
+        if ("id".equals(kode)) {
+            tampilkanBacaLengkap(badanAsli, gambarAsli, kreditAsli, labelArtikel);
+            return;
+        }
+        // sudah pernah diterjemahkan? langsung tampil
+        String ada = Terjemah.tersimpan(this, tautan, kode);
+        if (ada != null) {
+            tampilkanBacaLengkap(ada, gambarAsli, kreditAsli, labelArtikel);
+            return;
+        }
+        if (suara != null) suara.stop();
+        tombolDengar.setText(R.string.dengar);
+        muat.setVisibility(View.VISIBLE);
+        tombolTerjemah.setText(R.string.menerjemahkan);
+        final String isi = badanAsli;
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                final String hasil = Terjemah.html(ReaderActivity.this, tautan, kode, isi);
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        muat.setVisibility(View.GONE);
+                        tombolTerjemah.setText(Terjemah.nama(kode));
+                        if (hasil == null) {
+                            bahasa = "id";
+                            tombolTerjemah.setText(R.string.terjemah);
+                            Toast.makeText(ReaderActivity.this,
+                                    R.string.terjemah_gagal, Toast.LENGTH_LONG).show();
+                            return;
+                        }
+                        tampilkanBacaLengkap(hasil, gambarAsli, kreditAsli, labelArtikel);
+                    }
+                });
+            }
+        }, "terjemah").start();
+    }
+
+    /** Susun & tampilkan halaman baca dari badan tertentu. */
+    private void tampilkanBacaLengkap(String badan, String gambar, String kredit, String label) {
+        badanTampil = badan;
+        teksBacaan = IsiArtikel.teksBersih(badan);
+        String html = IsiArtikel.bungkus(judul, badan, gambar, kredit,
+                ukuran, tautan, label, gelap);
+        web.loadDataWithBaseURL(tautan, html, "text/html", "UTF-8", null);
+    }
+
     /** Ambil badan artikel lalu susun tampilan baca yang bersih. */
     private void tampilkanBaca(String isi) {
         badanArtikel = IsiArtikel.ambil(isi);
@@ -209,9 +345,13 @@ public class ReaderActivity extends Activity {
         labelArtikel = IsiArtikel.label(isi);
         // gambar ditampilkan terpisah di atas -> buang dari badan agar tidak dobel
         String badan = IsiArtikel.bersihkan(badanArtikel, gambarArtikel != null);
-        String html = IsiArtikel.bungkus(judul, badan, gambarArtikel,
-                kreditArtikel, ukuran, tautan, labelArtikel, gelap);
-        web.loadDataWithBaseURL(tautan, html, "text/html", "UTF-8", null);
+        // simpan versi asli supaya tombol Terjemah bisa kembali ke teks asli
+        badanAsli = badan;
+        gambarAsli = gambarArtikel;
+        kreditAsli = kreditArtikel;
+        bahasa = "id";
+        tombolTerjemah.setText(R.string.terjemah);
+        tampilkanBacaLengkap(badan, gambarArtikel, kreditArtikel, labelArtikel);
     }
 
     private void bukaLuar(String url) {
@@ -224,6 +364,8 @@ public class ReaderActivity extends Activity {
 
     /** Beralih ke tampilan web penuh (JavaScript hidup) untuk tautan internal. */
     private void modeWeb(String url) {
+        if (suara != null) suara.stop();
+        tombolDengar.setText(R.string.dengar);
         modeBaca = false;
         web.getSettings().setJavaScriptEnabled(true);
         web.setWebViewClient(new WebViewClient());
@@ -247,5 +389,11 @@ public class ReaderActivity extends Activity {
     public void onBackPressed() {
         if (!modeBaca && web.canGoBack()) web.goBack();
         else super.onBackPressed();
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (suara != null) suara.tutup();
+        super.onDestroy();
     }
 }

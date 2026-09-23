@@ -113,5 +113,32 @@
             android:text="@string/browser"
             android:textColor="@color/teks2"
             android:textSize="12sp" />
+
+        <TextView
+            android:id="@+id/tombol_dengar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/tombol_bulat"
+            android:paddingLeft="12dp"
+            android:paddingRight="12dp"
+            android:paddingTop="6dp"
+            android:paddingBottom="6dp"
+            android:text="@string/dengar"
+            android:textColor="@color/aksen"
+            android:textSize="12sp" />
+
+        <TextView
+            android:id="@+id/tombol_terjemah"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="6dp"
+            android:background="@drawable/tombol_bulat"
+            android:paddingLeft="12dp"
+            android:paddingRight="12dp"
+            android:paddingTop="6dp"
+            android:paddingBottom="6dp"
+            android:text="@string/terjemah"
+            android:textColor="@color/aksen"
+            android:textSize="12sp" />
     </LinearLayout>
 </LinearLayout>
