@@ -25,9 +25,11 @@ public class MainActivity extends Activity {
     private static final String FEED =
             "https://eraaidailynews.blogspot.com/feeds/posts/default?alt=json&max-results=20";
 
+    // daftar label nyata dari blog (dihitung dari 151 artikel terbit)
     private static final String[] LABEL_UTAMA = {
-            "Sains", "Teknologi", "Ekonomi", "Kesehatan", "Fisika",
-            "Internasional", "Olahraga", "Bola", "Politik", "Lokal"
+            "Semua", "Sains", "Teknologi", "Ekonomi", "Kesehatan",
+            "Fisika", "Internasional", "Olahraga", "Bola", "Politik",
+            "Lokal", "Astronomi", "Hiburan", "AI"
     };
 
     private ListView daftar;
@@ -193,13 +195,14 @@ public class MainActivity extends Activity {
         barisLabel.removeAllViews();
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-        lp.setMargins(0, 0, 14, 0);
+        lp.setMargins(0, 0, 10, 0);
         for (final String nama : LABEL_UTAMA) {
             TextView t = new TextView(this);
             t.setText(nama);
             t.setTextSize(13);
-            t.setPadding(22, 8, 22, 8);
+            t.setPadding(20, 8, 20, 8);
             t.setGravity(Gravity.CENTER);
+            t.setSingleLine(true);
             boolean pilih = nama.equals(labelDipilih);
             GradientDrawable latar = new GradientDrawable();
             latar.setCornerRadius(30);
