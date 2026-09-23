@@ -23,8 +23,8 @@ jobs:
       - name: Susun
         env:
           NAME: EraaiDailyNews
-          VERSION_CODE: ${{ vars.VERSION_CODE || '3' }}
-          VERSION_NAME: ${{ vars.VERSION_NAME || '2.1' }}
+          VERSION_CODE: ${{ vars.VERSION_CODE || '4' }}
+          VERSION_NAME: ${{ vars.VERSION_NAME || '2.2' }}
           KUNCI_B64: ${{ secrets.KUNCI_B64 }}
           KUNCI_STOREPASS: ${{ secrets.KUNCI_STOREPASS }}
           KUNCI_KEYPASS: ${{ secrets.KUNCI_KEYPASS }}
