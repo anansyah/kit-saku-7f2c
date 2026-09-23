@@ -121,8 +121,7 @@ public class ReaderActivity extends Activity {
             public boolean shouldOverrideUrlLoading(WebView w, String url) {
                 if (url.contains(NAMA_ALAMAT)) {
                     if (modeBaca) {
-                        modeBaca = false;
-                        web.loadUrl(url);
+                        modeWeb(url);
                         return true;
                     }
                     return false;
@@ -199,6 +198,14 @@ public class ReaderActivity extends Activity {
         } catch (Exception e) {
             Toast.makeText(this, "Tidak ada aplikasi browser", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    /** Beralih ke tampilan web penuh (JavaScript hidup) untuk tautan internal. */
+    private void modeWeb(String url) {
+        modeBaca = false;
+        web.getSettings().setJavaScriptEnabled(true);
+        web.setWebViewClient(new WebViewClient());
+        web.loadUrl(url);
     }
 
     private void setelanWeb(WebView w) {
