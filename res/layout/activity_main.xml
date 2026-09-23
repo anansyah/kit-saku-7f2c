@@ -1,18 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/akar"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="@color/latar">
 
     <LinearLayout
+        android:id="@+id/kepala"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:background="@color/merah"
+        android:background="@color/latar"
         android:paddingLeft="14dp"
         android:paddingRight="14dp"
-        android:paddingTop="12dp"
+        android:paddingTop="14dp"
         android:paddingBottom="10dp">
 
         <LinearLayout
@@ -26,43 +28,74 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="@string/app_name"
-                android:textColor="@color/kepala_teks"
+                android:textColor="@color/teks"
                 android:textSize="19sp"
                 android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tombol_tema"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/tombol_bulat"
+                android:paddingLeft="12dp"
+                android:paddingRight="12dp"
+                android:paddingTop="7dp"
+                android:paddingBottom="7dp"
+                android:text="@string/tema_auto"
+                android:textColor="@color/aksen"
+                android:textSize="12sp" />
 
             <TextView
                 android:id="@+id/tombol_tersimpan"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:padding="8dp"
+                android:paddingLeft="10dp"
+                android:paddingTop="7dp"
+                android:paddingBottom="7dp"
                 android:text="@string/tersimpan"
-                android:textColor="@color/kepala_sub"
-                android:textSize="13sp" />
+                android:textColor="@color/teks2"
+                android:textSize="12sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:background="@drawable/kotak_cari">
+
+            <EditText
+                android:id="@+id/cari"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@null"
+                android:hint="@string/cari_hint"
+                android:imeOptions="actionSearch"
+                android:inputType="text"
+                android:maxLines="1"
+                android:paddingLeft="12dp"
+                android:paddingRight="8dp"
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp"
+                android:textColor="@color/teks"
+                android:textColorHint="@color/pudar"
+                android:textSize="14sp" />
 
             <TextView
                 android:id="@+id/tombol_segar"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:padding="8dp"
+                android:paddingLeft="12dp"
+                android:paddingRight="12dp"
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp"
                 android:text="@string/segar"
-                android:textColor="@color/kepala_teks"
-                android:textSize="16sp" />
+                android:textColor="@color/aksen"
+                android:textSize="13sp"
+                android:textStyle="bold" />
         </LinearLayout>
-
-        <EditText
-            android:id="@+id/cari"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:background="#FFFFFF"
-            android:hint="@string/cari_hint"
-            android:imeOptions="actionSearch"
-            android:inputType="text"
-            android:maxLines="1"
-            android:padding="10dp"
-            android:textColor="#1A1A1A"
-            android:textColorHint="#9E9E9E"
-            android:textSize="14sp" />
     </LinearLayout>
 
     <HorizontalScrollView
@@ -76,35 +109,91 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:padding="8dp" />
+            android:paddingLeft="12dp"
+            android:paddingRight="12dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp" />
     </HorizontalScrollView>
 
-    <TextView
-        android:id="@+id/status"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="14dp"
-        android:text="@string/memuat"
-        android:textColor="@color/teks_pudar"
-        android:textSize="15sp" />
-
-    <ListView
-        android:id="@+id/daftar"
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
-        android:divider="@null"
-        android:dividerHeight="0dp" />
+        android:layout_weight="1">
 
-    <TextView
+        <ListView
+            android:id="@+id/daftar"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:divider="@null"
+            android:dividerHeight="0dp" />
+
+        <LinearLayout
+            android:id="@+id/panel_muat"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/latar"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <ProgressBar
+                android:id="@+id/pemutar"
+                android:layout_width="42dp"
+                android:layout_height="42dp"
+                android:indeterminateTint="@color/aksen" />
+
+            <TextView
+                android:id="@+id/teks_muat"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                android:text="@string/memuat"
+                android:textColor="@color/pudar"
+                android:textSize="14sp" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/status"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top"
+            android:background="@color/latar"
+            android:gravity="center"
+            android:padding="18dp"
+            android:textColor="@color/pudar"
+            android:textSize="14sp"
+            android:visibility="gone" />
+    </FrameLayout>
+
+    <LinearLayout
         android:id="@+id/lebih"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/latar_lembut"
-        android:gravity="center"
-        android:padding="16dp"
-        android:text="@string/muat_lagi"
-        android:textColor="@color/merah"
-        android:textSize="15sp"
-        android:visibility="gone" />
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp"
+        android:paddingTop="14dp"
+        android:paddingBottom="14dp"
+        android:visibility="gone">
+
+        <ProgressBar
+            android:id="@+id/pemutar_kecil"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:indeterminateTint="@color/aksen"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/teks_lebih"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="@string/muat_lagi"
+            android:textColor="@color/aksen"
+            android:textSize="15sp"
+            android:textStyle="bold" />
+    </LinearLayout>
 </LinearLayout>

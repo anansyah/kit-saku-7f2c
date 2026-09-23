@@ -12,8 +12,10 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -22,8 +24,7 @@ import java.util.List;
 
 public class MainActivity extends Activity {
 
-    private static final String FEED =
-            "https://eraaidailynews.blogspot.com/feeds/posts/default?alt=json&max-results=20";
+    private static final int PER_HALAMAN = 20;
 
     // daftar label nyata dari blog (dihitung dari 151 artikel terbit)
     private static final String[] LABEL_UTAMA = {
@@ -33,16 +34,21 @@ public class MainActivity extends Activity {
     };
 
     private ListView daftar;
-    private TextView status, lebih;
-    private LinearLayout barisLabel;
+    private LinearLayout panelMuat, lebih, barisLabel;
+    private TextView status, teksMuat, teksLebih, tombolTema, tombolTersimpan;
+    private ProgressBar pemutar, pemutarKecil;
     private EditText cari;
     private Adapter adapter;
     private final List<ParseFeed.Berita> isi = new ArrayList<>();
+
     private String labelDipilih = "Semua";
     private String kataKunci = "";
     private int mulai = 1;
+    private int total = -1;          // jumlah artikel di blog (dari feed)
     private boolean sedangAmbil = false;
     private boolean modeTersimpan = false;
+    private boolean gelap = true;
+    private boolean habis = false;   // semua berita sudah termuat
 
     private class Adapter extends BaseAdapter {
         @Override
@@ -66,7 +72,13 @@ public class MainActivity extends Activity {
             TextView label = v.findViewById(R.id.label);
             TextView cuplikan = v.findViewById(R.id.cuplikan);
             TextView simpan = v.findViewById(R.id.simpan);
-            android.widget.ImageView gambar = v.findViewById(R.id.gambar);
+            ImageView gambar = v.findViewById(R.id.gambar);
+
+            judul.setTextColor(Tampilan.teks(gelap));
+            cuplikan.setTextColor(Tampilan.teks2(gelap));
+            waktu.setTextColor(Tampilan.pudar(gelap));
+            simpan.setTextColor(Tampilan.aksen(gelap));
+            gambar.setBackgroundColor(Tampilan.permukaan(gelap));
 
             judul.setText(b.judul);
             waktu.setText(b.waktuPendek());
@@ -74,13 +86,14 @@ public class MainActivity extends Activity {
             String utama = b.labelUtama();
             if (utama.length() > 0) {
                 label.setVisibility(View.VISIBLE);
-                label.setText(utama);
+                label.setText(utama.toUpperCase());
             } else {
                 label.setVisibility(View.GONE);
             }
+
             final String tautan = b.tautan;
-            final boolean kesimpanan = Simpan.ada(MainActivity.this, tautan);
-            simpan.setText(kesimpanan ? R.string.disimpan : R.string.simpan);
+            simpan.setText(Simpan.ada(MainActivity.this, tautan)
+                    ? R.string.disimpan : R.string.simpan);
             simpan.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -118,11 +131,20 @@ public class MainActivity extends Activity {
 
         daftar = findViewById(R.id.daftar);
         status = findViewById(R.id.status);
+        panelMuat = findViewById(R.id.panel_muat);
+        teksMuat = findViewById(R.id.teks_muat);
+        pemutar = findViewById(R.id.pemutar);
         lebih = findViewById(R.id.lebih);
+        teksLebih = findViewById(R.id.teks_lebih);
+        pemutarKecil = findViewById(R.id.pemutar_kecil);
         barisLabel = findViewById(R.id.baris_label);
         cari = findViewById(R.id.cari);
+        tombolTema = findViewById(R.id.tombol_tema);
+        tombolTersimpan = findViewById(R.id.tombol_tersimpan);
         TextView segar = findViewById(R.id.tombol_segar);
-        TextView tersimpan = findViewById(R.id.tombol_tersimpan);
+
+        gelap = Tampilan.gelap(this);
+        tombolTema.setText("Tema: " + Tampilan.namaMode(this));
 
         adapter = new Adapter();
         daftar.setAdapter(adapter);
@@ -137,11 +159,21 @@ public class MainActivity extends Activity {
             }
         });
 
+        // ==== TOMBOL "MUAT BERITA LAIN" — kini benar-benar berfungsi ====
+        lebih.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (habis) return;
+                ambilLagi();
+            }
+        });
+
         segar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 modeTersimpan = false;
                 mulai = 1;
+                total = -1;
                 kataKunci = "";
                 cari.setText("");
                 labelDipilih = "Semua";
@@ -152,12 +184,20 @@ public class MainActivity extends Activity {
             }
         });
 
-        tersimpan.setOnClickListener(new View.OnClickListener() {
+        tombolTersimpan.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 modeTersimpan = true;
                 lebih.setVisibility(View.GONE);
                 muatTersimpan();
+            }
+        });
+
+        tombolTema.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Tampilan.setMode(MainActivity.this, Tampilan.modeBerikutnya(MainActivity.this));
+                recreate();
             }
         });
 
@@ -168,6 +208,7 @@ public class MainActivity extends Activity {
                     modeTersimpan = false;
                     kataKunci = cari.getText().toString().trim();
                     mulai = 1;
+                    total = -1;
                     isi.clear();
                     adapter.notifyDataSetChanged();
                     pasangLabel();
@@ -195,21 +236,21 @@ public class MainActivity extends Activity {
         barisLabel.removeAllViews();
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-        lp.setMargins(0, 0, 10, 0);
+        lp.setMargins(0, 0, 8, 0);
         for (final String nama : LABEL_UTAMA) {
             TextView t = new TextView(this);
             t.setText(nama);
-            t.setTextSize(13);
-            t.setPadding(20, 8, 20, 8);
+            t.setTextSize(12);
+            t.setPadding(18, 7, 18, 7);
             t.setGravity(Gravity.CENTER);
             t.setSingleLine(true);
             boolean pilih = nama.equals(labelDipilih);
             GradientDrawable latar = new GradientDrawable();
             latar.setCornerRadius(30);
-            latar.setColor(pilih ? Color.parseColor("#C62828") : Color.WHITE);
-            latar.setStroke(1, Color.parseColor("#DDDDDD"));
+            latar.setColor(pilih ? Tampilan.aksen(gelap) : Tampilan.permukaan(gelap));
+            latar.setStroke(1, Tampilan.garis(gelap));
             t.setBackground(latar);
-            t.setTextColor(pilih ? Color.WHITE : Color.parseColor("#444444"));
+            t.setTextColor(pilih ? Tampilan.diAtasAksen() : Tampilan.teks2(gelap));
             t.setLayoutParams(lp);
             t.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -217,6 +258,7 @@ public class MainActivity extends Activity {
                     modeTersimpan = false;
                     labelDipilih = nama;
                     mulai = 1;
+                    total = -1;
                     isi.clear();
                     adapter.notifyDataSetChanged();
                     pasangLabel();
@@ -232,10 +274,9 @@ public class MainActivity extends Activity {
         StringBuilder u = new StringBuilder(
                 "https://eraaidailynews.blogspot.com/feeds/posts/default");
         if (!"Semua".equals(labelDipilih)) {
-            String label = labelDipilih.replace(" ", "%20");
-            u.append("/-/").append(label);
+            u.append("/-/").append(labelDipilih.replace(" ", "%20"));
         }
-        u.append("?alt=json&max-results=20");
+        u.append("?alt=json&max-results=").append(PER_HALAMAN);
         if (kataKunci.length() > 0) {
             try {
                 u.append("&q=").append(java.net.URLEncoder.encode(kataKunci, "UTF-8"));
@@ -246,13 +287,36 @@ public class MainActivity extends Activity {
         return u.toString();
     }
 
+    /** Ambil halaman berikutnya — dipakai tombol "Muat berita lain". */
+    private void ambilLagi() {
+        if (sedangAmbil) return;
+        tampilkanMuatLagi(true);
+        ambil();
+    }
+
+    private void tampilkanMuatLagi(boolean sedang) {
+        if (sedang) {
+            lebih.setVisibility(View.VISIBLE);
+            pemutarKecil.setVisibility(View.VISIBLE);
+            teksLebih.setText(R.string.sedang_memuat_lagi);
+        } else {
+            pemutarKecil.setVisibility(View.GONE);
+            teksLebih.setText(R.string.muat_lagi);
+        }
+    }
+
     private void ambil() {
         if (sedangAmbil) return;
         sedangAmbil = true;
         if (mulai == 1) {
-            status.setVisibility(View.VISIBLE);
-            status.setText(R.string.memuat);
+            // mulai dari awal -> bukan "sudah habis" lagi
+            habis = false;
+            // animasi lingkaran berputar saat memuat pertama / ganti kategori / cari
             lebih.setVisibility(View.GONE);
+            status.setVisibility(View.GONE);
+            teksMuat.setText(R.string.memuat);
+            pemutar.setVisibility(View.VISIBLE);
+            panelMuat.setVisibility(View.VISIBLE);
         }
         final String alamat = alamat();
         Pengambil.unduh(alamat, new Pengambil.Dengar() {
@@ -262,33 +326,64 @@ public class MainActivity extends Activity {
                     @Override
                     public void run() {
                         sedangAmbil = false;
+                        panelMuat.setVisibility(View.GONE);
                         if (galat != null || data == null) {
+                            tampilkanMuatLagi(false);
                             if (isi.isEmpty()) {
+                                status.setVisibility(View.VISIBLE);
                                 status.setText(R.string.gagal);
                             } else {
-                                status.setVisibility(View.GONE);
                                 Toast.makeText(MainActivity.this,
                                         R.string.gagal, Toast.LENGTH_SHORT).show();
+                                lebih.setVisibility(View.VISIBLE);
                             }
-                            if (mulai > 1) lebih.setVisibility(View.VISIBLE);
                             return;
                         }
+                        String t = ParseFeed.total(data);
+                        if (t != null && t.length() > 0) {
+                            try { total = Integer.parseInt(t); } catch (Exception ignored) {}
+                        }
                         List<ParseFeed.Berita> baru = ParseFeed.ambil(data);
-                        status.setVisibility(View.GONE);
                         if (mulai == 1 && baru.isEmpty()) {
                             status.setVisibility(View.VISIBLE);
                             status.setText(kataKunci.length() > 0
                                     ? R.string.tidak_ada_hasil : R.string.kosong);
-                        } else {
-                            isi.addAll(baru);
-                            adapter.notifyDataSetChanged();
+                            lebih.setVisibility(View.GONE);
+                            return;
                         }
-                        lebih.setVisibility(baru.size() >= 20 ? View.VISIBLE : View.GONE);
-                        mulai += 20;
+                        // buang yang sudah ada supaya tidak ada berita kembar
+                        int ditambah = 0;
+                        for (ParseFeed.Berita b : baru) {
+                            if (!sudahAda(b.tautan)) {
+                                isi.add(b);
+                                ditambah++;
+                            }
+                        }
+                        adapter.notifyDataSetChanged();
+                        mulai += PER_HALAMAN;
+
+                        // masih ada halaman berikutnya?
+                        boolean masihAda = baru.size() >= PER_HALAMAN
+                                && (total < 0 || isi.size() < total);
+                        habis = !masihAda;
+                        tampilkanMuatLagi(false);
+                        lebih.setVisibility(View.VISIBLE);
+                        if (habis) {
+                            pemutarKecil.setVisibility(View.GONE);
+                            teksLebih.setText(R.string.sudah_habis);
+                        }
                     }
                 });
             }
         });
+    }
+
+    private boolean sudahAda(String tautan) {
+        if (tautan == null) return true;
+        for (ParseFeed.Berita x : isi) {
+            if (tautan.equals(x.tautan)) return true;
+        }
+        return false;
     }
 
     @Override
@@ -299,6 +394,7 @@ public class MainActivity extends Activity {
             cari.setText("");
             labelDipilih = "Semua";
             mulai = 1;
+            total = -1;
             isi.clear();
             adapter.notifyDataSetChanged();
             pasangLabel();

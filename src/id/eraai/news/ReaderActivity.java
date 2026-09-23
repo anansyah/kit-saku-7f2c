@@ -33,6 +33,7 @@ public class ReaderActivity extends Activity {
     private String labelArtikel;
     private int ukuran = 17;
     private boolean modeBaca = true;
+    private boolean gelap = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,16 +44,22 @@ public class ReaderActivity extends Activity {
         judul = getIntent().getStringExtra("judul");
         if (tautan == null) { finish(); return; }
 
+        gelap = Tampilan.gelap(this);
+
         TextView labelSumber = findViewById(R.id.label_sumber);
         labelSumber.setText(judul == null ? getString(R.string.sumber) : judul);
+        labelSumber.setTextColor(Tampilan.teks2(gelap));
 
         muat = findViewById(R.id.muat);
         web = findViewById(R.id.web);
         setelanWeb(web);
         tombolSimpan = findViewById(R.id.tombol_simpan);
+        tombolSimpan.setTextColor(Tampilan.aksen(gelap));
         segarkanTombolSimpan();
 
-        findViewById(R.id.tombol_kembali).setOnClickListener(new View.OnClickListener() {
+        TextView tKembali = findViewById(R.id.tombol_kembali);
+        tKembali.setTextColor(Tampilan.aksen(gelap));
+        tKembali.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (!modeBaca && web.canGoBack()) web.goBack(); else finish();
@@ -147,7 +154,7 @@ public class ReaderActivity extends Activity {
                     kreditArtikel = IsiArtikel.kredit(b.isi);
                 }
                 String html = IsiArtikel.bungkus(judul, badanArtikel, gambarArtikel,
-                        kreditArtikel, ukuran, tautan, labelArtikel);
+                        kreditArtikel, ukuran, tautan, labelArtikel, gelap);
                 web.loadDataWithBaseURL(tautan, html, "text/html", "UTF-8", null);
                 return;
             }
@@ -190,7 +197,7 @@ public class ReaderActivity extends Activity {
         // gambar ditampilkan terpisah di atas -> buang dari badan agar tidak dobel
         String badan = IsiArtikel.bersihkan(badanArtikel, gambarArtikel != null);
         String html = IsiArtikel.bungkus(judul, badan, gambarArtikel,
-                kreditArtikel, ukuran, tautan, labelArtikel);
+                kreditArtikel, ukuran, tautan, labelArtikel, gelap);
         web.loadDataWithBaseURL(tautan, html, "text/html", "UTF-8", null);
     }
 
@@ -220,7 +227,7 @@ public class ReaderActivity extends Activity {
         s.setDisplayZoomControls(false);
         s.setSupportZoom(true);
         s.setDefaultTextEncodingName("UTF-8");
-        w.setBackgroundColor(Color.WHITE);
+        w.setBackgroundColor(Tampilan.bg(gelap));
     }
 
     @Override

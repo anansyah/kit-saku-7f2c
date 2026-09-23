@@ -158,30 +158,41 @@ final class IsiArtikel {
                 .replaceAll("\\s+", " ").trim();
     }
 
-    /** Susun halaman baca: label, judul, gambar + kredit, isi, sumber. */
+    /** Susun halaman baca: label, judul, gambar + kredit, isi, sumber.
+     *  Warna mengikuti tema blog (gelap: latar #0B1220 aksen #F2B544). */
     static String bungkus(String judul, String badan, String gambar, String kredit,
-                          int ukuran, String tautan, String label) {
+                          int ukuran, String tautan, String label, boolean gelap) {
+        String bg = gelap ? "#0B1220" : "#F4F6FA";
+        String teks = gelap ? "#E8EDF6" : "#0E182B";
+        String teks2 = gelap ? "#B9C4D8" : "#33425C";
+        String pudar = gelap ? "#8D9CB5" : "#56667F";
+        String aksen = gelap ? "#F2B544" : "#E9A62A";
+        String garis = gelap ? "#24334F" : "#D3DBE8";
         StringBuilder h = new StringBuilder();
         h.append("<!DOCTYPE html><html><head><meta charset=\"utf-8\">");
         h.append("<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">");
         h.append("<style>");
-        h.append("body{margin:0;padding:16px 18px 40px;background:#fff;color:#1a1a1a;");
+        h.append("body{margin:0;padding:16px 18px 40px;background:").append(bg)
+         .append(";color:").append(teks).append(";");
         h.append("font-family:-apple-system,'Segoe UI',Roboto,sans-serif;line-height:1.72;");
         h.append("font-size:").append(ukuran).append("px;-webkit-text-size-adjust:100%}");
-        h.append(".label{color:#C62828;font-size:.72em;font-weight:700;");
+        h.append(".label{color:").append(aksen).append(";font-size:.72em;font-weight:700;");
         h.append("letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px}");
-        h.append("h1{font-size:1.5em;line-height:1.25;margin:0 0 10px;font-weight:800}");
-        h.append(".meta{color:#8a8a8a;font-size:.78em;margin-bottom:18px}");
+        h.append("h1{font-size:1.5em;line-height:1.25;margin:0 0 10px;font-weight:800;color:")
+         .append(teks).append("}");
+        h.append(".meta{color:").append(pudar).append(";font-size:.78em;margin-bottom:18px}");
         h.append(".gambar img{width:100%;height:auto;border-radius:10px;display:block}");
-        h.append(".kredit{color:#8a8a8a;font-size:.72em;margin:6px 0 20px}");
+        h.append(".kredit{color:").append(pudar).append(";font-size:.72em;margin:6px 0 20px}");
         h.append("p{margin:0 0 1.15em}");
         h.append("img{max-width:100%;height:auto;border-radius:10px}");
-        h.append("h2,h3{font-size:1.15em;margin:1.4em 0 .5em}");
-        h.append("blockquote{border-left:3px solid #C62828;margin:1em 0;padding:0 0 0 14px;color:#444}");
-        h.append("a{color:#C62828}");
+        h.append("h2,h3{font-size:1.15em;margin:1.4em 0 .5em;color:").append(teks).append("}");
+        h.append("em,i{color:").append(teks2).append("}");
+        h.append("blockquote{border-left:3px solid ").append(aksen)
+         .append(";margin:1em 0;padding:0 0 0 14px;color:").append(teks2).append("}");
+        h.append("a{color:").append(aksen).append("}");
         h.append(".kredit-gambar{display:none}");
-        h.append(".sumber{margin-top:26px;padding-top:14px;border-top:1px solid #eee;");
-        h.append("color:#8a8a8a;font-size:.75em}");
+        h.append(".sumber{margin-top:26px;padding-top:14px;border-top:1px solid ").append(garis)
+         .append(";color:").append(pudar).append(";font-size:.75em}");
         h.append("</style></head><body>");
 
         if (label != null && label.length() > 0) {
