@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Eraai Daily News</string>
+    <string name="memuat">Memuat berita…</string>
+    <string name="gagal">Gagal memuat. Periksa sambungan internet.</string>
+    <string name="coba_lagi">Coba lagi</string>
+    <string name="buka_browser">Buka di browser</string>
+    <string name="berbagi">Bagikan</string>
+    <string name="kosong">Belum ada berita.</string>
+    <string name="muat_lagi">Muat lagi</string>
+    <string name="kembali">Kembali</string>
+    <string name="sumber">Sumber: eraaidailynews.blogspot.com</string>
+    <string name="urut_terbaru">Terbaru</string>
+    <string name="tentang">Tentang aplikasi</string>
+</resources>

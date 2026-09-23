@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+# Perakit paket Android memakai perkakas SDK yang sudah ada di mesin.
+set -euo pipefail
+
+SDK="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-/usr/local/lib/android/sdk}}"
+[ -d "$SDK" ] || { echo "SDK tidak ditemukan"; ls -d /usr/local/lib/android/* 2>/dev/null; exit 1; }
+
+PLAT=$(ls -d "$SDK"/platforms/android-* 2>/dev/null | sort -V | tail -1)
+BT=$(ls -d "$SDK"/build-tools/* 2>/dev/null | sort -V | tail -1)
+[ -n "$PLAT" ] && [ -n "$BT" ] || { echo "platform/build-tools kosong"; ls "$SDK"; exit 1; }
+
+JAR="$PLAT/android.jar"
+API=$(basename "$PLAT" | sed 's/android-//')
+echo "SDK      : $SDK"
+echo "platform : $PLAT (API $API)"
+echo "build    : $BT"
+
+NAME="${NAME:-EraaiDailyNews}"
+VVERSION="${VERSION_CODE:-1}"
+NVERSION="${VERSION_NAME:-1.0}"
+rm -rf work out; mkdir -p work/gen work/classes work/obj out
+
+"$BT/aapt2" compile --dir res -o work/res.zip
+"$BT/aapt2" link -o work/base.apk \
+  -I "$JAR" --manifest AndroidManifest.xml -R work/res.zip \
+  --java work/gen --min-sdk-version 21 --target-sdk-version "$API" \
+  --version-code "$VVERSION" --version-name "$NVERSION" --auto-add-overlay
+
+find work/gen src -name '*.java' > work/sources.txt
+echo "berkas sumber: $(wc -l < work/sources.txt)"
+javac -Xlint:-options -source 8 -target 8 -bootclasspath "$JAR" \
+  -d work/classes @work/sources.txt
+
+find work/classes -name '*.class' > work/cls.txt
+"$BT/d8" --min-api 21 --lib "$JAR" --output work/obj @work/cls.txt
+cp work/obj/classes.dex work/classes.dex
+
+cd work
+cp base.apk app.unsigned.apk
+"$BT/aapt" add app.unsigned.apk classes.dex
+"$BT/zipalign" -f 4 app.unsigned.apk app.aligned.apk
+
+if [ -n "${KUNCI_B64:-}" ]; then
+  echo "memakai kunci permanen dari secret"
+  echo "$KUNCI_B64" | base64 -d > rakit.keystore
+  SPASS="$KUNCI_STOREPASS"
+  KPASS="$KUNCI_KEYPASS"
+else
+  echo "memakai kunci sementara (perakitan uji)"
+  keytool -genkeypair -keystore rakit.keystore -alias rakit \
+    -keyalg RSA -keysize 2048 -validity 10000 \
+    -storepass sementara -keypass sementara \
+    -dname "CN=Rakit, OU=Rakit, O=Rakit, L=Bandung, C=ID" >/dev/null
+  SPASS="sementara"
+  KPASS="sementara"
+fi
+
+"$BT/apksigner" sign --ks rakit.keystore --ks-pass "pass:$SPASS" \
+  --key-pass "pass:$KPASS" --out "../out/${NAME}.apk" app.aligned.apk
+
+echo "--- verifikasi ---"
+"$BT/apksigner" verify --print-certs "../out/${NAME}.apk"
+ls -l ../out/
+rm -f rakit.keystore
