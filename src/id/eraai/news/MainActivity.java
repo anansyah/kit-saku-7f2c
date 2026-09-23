@@ -225,20 +225,21 @@ public class MainActivity extends Activity {
     }
 
     private String alamat() {
-        StringBuilder u = new StringBuilder(FEED);
+        // bentuk sah: .../feeds/posts/default[-/Label]?alt=json&max-results=20[&q=..][&start-index=..]
+        StringBuilder u = new StringBuilder(
+                "https://eraaidailynews.blogspot.com/feeds/posts/default");
         if (!"Semua".equals(labelDipilih)) {
-            u.append("/-/").append(labelDipilih);
+            String label = labelDipilih.replace(" ", "%20");
+            u.append("/-/").append(label);
         }
+        u.append("?alt=json&max-results=20");
         if (kataKunci.length() > 0) {
             try {
-                String q = java.net.URLEncoder.encode(kataKunci, "UTF-8");
-                u.append(u.toString().contains("?") ? "&" : "?");
-                u.append("q=").append(q);
+                u.append("&q=").append(java.net.URLEncoder.encode(kataKunci, "UTF-8"));
             } catch (Exception ignored) {
             }
         }
-        u.append(u.toString().contains("?") ? "&" : "?");
-        u.append("start-index=").append(mulai);
+        u.append("&start-index=").append(mulai);
         return u.toString();
     }
 

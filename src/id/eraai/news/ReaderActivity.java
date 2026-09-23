@@ -27,6 +27,10 @@ public class ReaderActivity extends Activity {
     private String tautan;
     private String judul;
     private String halaman;
+    private String badanArtikel;
+    private String gambarArtikel;
+    private String kreditArtikel;
+    private String labelArtikel;
     private int ukuran = 17;
     private boolean modeBaca = true;
 
@@ -80,10 +84,14 @@ public class ReaderActivity extends Activity {
                     Simpan.hapus(ReaderActivity.this, tautan);
                     Toast.makeText(ReaderActivity.this, R.string.terhapus, Toast.LENGTH_SHORT).show();
                 } else {
+                    // simpan HANYA badan artikel (kecil), bukan seluruh halaman
                     ParseFeed.Berita b = new ParseFeed.Berita();
                     b.judul = judul;
                     b.tautan = tautan;
-                    b.isi = halaman;
+                    b.isi = badanArtikel;
+                    b.gambar = gambarArtikel;
+                    b.kredit = kreditArtikel;
+                    b.label = labelArtikel;
                     Simpan.tambah(ReaderActivity.this, b);
                     Toast.makeText(ReaderActivity.this, R.string.tersimpan_ok, Toast.LENGTH_SHORT).show();
                 }
@@ -127,10 +135,21 @@ public class ReaderActivity extends Activity {
         // 1) coba dari simpanan (bisa dibaca tanpa internet)
         List<ParseFeed.Berita> tersimpan = Simpan.semua(this);
         for (ParseFeed.Berita b : tersimpan) {
-            if (b.tautan != null && b.tautan.equals(tautan) && b.isi != null && b.isi.length() > 500) {
-                halaman = b.isi;
+            if (b.tautan != null && b.tautan.equals(tautan) && b.isi != null && b.isi.length() > 200) {
                 if (judul == null || judul.length() == 0) judul = b.judul;
-                tampilkanBaca(halaman);
+                badanArtikel = b.isi;
+                gambarArtikel = b.gambar;
+                kreditArtikel = b.kredit;
+                labelArtikel = b.label;
+                if (gambarArtikel == null || gambarArtikel.length() == 0) {
+                    gambarArtikel = IsiArtikel.gambar(b.isi);
+                }
+                if (kreditArtikel == null || kreditArtikel.length() == 0) {
+                    kreditArtikel = IsiArtikel.kredit(b.isi);
+                }
+                String html = IsiArtikel.bungkus(judul, badanArtikel, gambarArtikel,
+                        kreditArtikel, ukuran, tautan, labelArtikel);
+                web.loadDataWithBaseURL(tautan, html, "text/html", "UTF-8", null);
                 return;
             }
         }
@@ -165,11 +184,12 @@ public class ReaderActivity extends Activity {
 
     /** Ambil badan artikel lalu susun tampilan baca yang bersih. */
     private void tampilkanBaca(String isi) {
-        String badan = IsiArtikel.ambil(isi);
-        String gambar = IsiArtikel.gambar(isi);
-        String kredit = IsiArtikel.kredit(isi);
-        String label = IsiArtikel.label(isi);
-        String html = IsiArtikel.bungkus(judul, badan, gambar, kredit, ukuran, tautan, label);
+        badanArtikel = IsiArtikel.ambil(isi);
+        gambarArtikel = IsiArtikel.gambar(isi);
+        kreditArtikel = IsiArtikel.kredit(isi);
+        labelArtikel = IsiArtikel.label(isi);
+        String html = IsiArtikel.bungkus(judul, badanArtikel, gambarArtikel,
+                kreditArtikel, ukuran, tautan, labelArtikel);
         web.loadDataWithBaseURL(tautan, html, "text/html", "UTF-8", null);
     }
 

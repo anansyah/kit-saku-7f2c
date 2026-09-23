@@ -14,7 +14,7 @@ final class Simpan {
 
     private static final String NAMA = "eraai_simpan";
     private static final String KUNCI = "daftar";
-    private static final int MAKS = 80;
+    private static final int MAKS = 40;
 
     private Simpan() {}
 
@@ -36,6 +36,7 @@ final class Simpan {
                 b.gambar = o.optString("gambar");
                 b.cuplikan = o.optString("cuplikan");
                 b.isi = o.optString("isi");
+                b.kredit = o.optString("kredit");
                 keluar.add(b);
             }
         } catch (Exception ignored) {
@@ -80,6 +81,7 @@ final class Simpan {
                 o.put("gambar", b.gambar == null ? "" : b.gambar);
                 o.put("cuplikan", b.cuplikan == null ? "" : b.cuplikan);
                 o.put("isi", b.isi == null ? "" : b.isi);
+                o.put("kredit", b.kredit == null ? "" : b.kredit);
                 arr.put(o);
             }
         } catch (Exception ignored) {
