@@ -7,9 +7,24 @@
     <string name="buka_browser">Buka di browser</string>
     <string name="berbagi">Bagikan</string>
     <string name="kosong">Belum ada berita.</string>
-    <string name="muat_lagi">Muat lagi</string>
+    <string name="muat_lagi">Muat berita lain</string>
     <string name="kembali">Kembali</string>
-    <string name="sumber">Sumber: eraaidailynews.blogspot.com</string>
-    <string name="urut_terbaru">Terbaru</string>
+    <string name="sumber">Eraai Daily News</string>
     <string name="tentang">Tentang aplikasi</string>
+    <string name="cari_hint">Cari berita…</string>
+    <string name="segar">Segarkan</string>
+    <string name="tersimpan">Tersimpan</string>
+    <string name="simpan">Simpan</string>
+    <string name="disimpan">Tersimpan</string>
+    <string name="hapus_simpan">Hapus</string>
+    <string name="tidak_ada_hasil">Tidak ada berita yang cocok.</string>
+    <string name="semua">Semua</string>
+    <string name="belum_ada_simpanan">Belum ada berita tersimpan.\nKetuk "Simpan" pada berita untuk membacanya tanpa internet.</string>
+    <string name="terhapus">Dihapus dari simpanan</string>
+    <string name="tersimpan_ok">Disimpan — bisa dibaca tanpa internet</string>
+    <string name="gambar_berita">Gambar berita</string>
+    <string name="panah_kembali">←</string>
+    <string name="ukuran_huruf">Aa</string>
+    <string name="mode_baca">Mode baca</string>
+    <string name="sedang_memuat">Memuat…</string>
 </resources>

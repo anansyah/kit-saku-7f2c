@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="merah">#C62828</color>
+    <color name="merah_tua">#8E1B1B</color>
+    <color name="latar">#FFFFFF</color>
+    <color name="latar_kartu">#FFFFFF</color>
+    <color name="latar_lembut">#F5F5F5</color>
+    <color name="teks">#1A1A1A</color>
+    <color name="teks_pudar">#6B6B6B</color>
+    <color name="garis">#E4E4E4</color>
+    <color name="kepala_teks">#FFFFFF</color>
+    <color name="kepala_sub">#FFE0E0</color>
+</resources>
