@@ -15,37 +15,39 @@ final class Pengambil {
         void selesai(String isi, String galat);
     }
 
-    static void unduh(String alamat, Dengar dengar) {
-        new Thread(() -> {
-            String hasil = null;
-            String galat = null;
-            try {
-                HttpURLConnection c = (HttpURLConnection) new URL(alamat).openConnection();
-                c.setConnectTimeout(15000);
-                c.setReadTimeout(20000);
-                c.setRequestProperty("User-Agent", "EraaiNews/1.0 (Android)");
-                int kode = c.getResponseCode();
-                InputStream is = (kode >= 200 && kode < 300) ? c.getInputStream() : c.getErrorStream();
-                StringBuilder sb = new StringBuilder();
-                if (is != null) {
-                    BufferedReader r = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
-                    String baris;
-                    char[] buf = new char[8192];
-                    int n;
-                    while ((n = r.read(buf)) != -1) sb.append(buf, 0, n);
-                    r.close();
+    static void unduh(final String alamat, final Dengar dengar) {
+        Thread t = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                String hasil = null;
+                String galat = null;
+                try {
+                    HttpURLConnection c = (HttpURLConnection) new URL(alamat).openConnection();
+                    c.setConnectTimeout(15000);
+                    c.setReadTimeout(20000);
+                    c.setRequestProperty("User-Agent", "EraaiNews/1.0 (Android)");
+                    int kode = c.getResponseCode();
+                    InputStream is = (kode >= 200 && kode < 300) ? c.getInputStream() : c.getErrorStream();
+                    StringBuilder sb = new StringBuilder();
+                    if (is != null) {
+                        BufferedReader r = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
+                        char[] buf = new char[8192];
+                        int n;
+                        while ((n = r.read(buf)) != -1) sb.append(buf, 0, n);
+                        r.close();
+                    }
+                    if (kode >= 200 && kode < 300) {
+                        hasil = sb.toString();
+                    } else {
+                        galat = "HTTP " + kode;
+                    }
+                    c.disconnect();
+                } catch (Exception e) {
+                    galat = e.getMessage() == null ? e.toString() : e.getMessage();
                 }
-                if (kode >= 200 && kode < 300) {
-                    hasil = sb.toString();
-                } else {
-                    galat = "HTTP " + kode;
-                }
-                c.disconnect();
-            } catch (Exception e) {
-                galat = e.getMessage() == null ? e.toString() : e.getMessage();
+                dengar.selesai(hasil, galat);
             }
-            final String h = hasil, g = galat;
-            dengar.selesai(h, g);
-        }, "pengambil").start();
+        }, "pengambil");
+        t.start();
     }
 }
