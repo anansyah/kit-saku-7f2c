@@ -25,7 +25,7 @@ final class Pengambil {
                     HttpURLConnection c = (HttpURLConnection) new URL(alamat).openConnection();
                     c.setConnectTimeout(15000);
                     c.setReadTimeout(20000);
-                    c.setRequestProperty("User-Agent", "EraaiNews/1.0 (Android)");
+                    c.setRequestProperty("User-Agent", "EraAIdailyNews/2.3 (Android)");
                     int kode = c.getResponseCode();
                     InputStream is = (kode >= 200 && kode < 300) ? c.getInputStream() : c.getErrorStream();
                     StringBuilder sb = new StringBuilder();

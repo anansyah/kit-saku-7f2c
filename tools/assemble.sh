@@ -31,7 +31,7 @@ rm -rf work out; mkdir -p work/gen work/classes work/obj out
 "$BT/aapt2" compile --dir res -o work/res.zip
 "$BT/aapt2" link -o work/base.apk \
   -I "$JAR" --manifest AndroidManifest.xml -R work/res.zip \
-  --java work/gen --min-sdk-version 21 --target-sdk-version "$TARGET" \
+  --java work/gen --min-sdk-version 24 --target-sdk-version "$TARGET" \
   --version-code "$VVERSION" --version-name "$NVERSION" --auto-add-overlay
 
 find work/gen src -name '*.java' > work/sources.txt
@@ -40,7 +40,7 @@ javac -Xlint:-options -source 8 -target 8 -bootclasspath "$JAR" \
   -d work/classes @work/sources.txt
 
 find work/classes -name '*.class' > work/cls.txt
-"$BT/d8" --min-api 21 --lib "$JAR" --output work/obj @work/cls.txt
+"$BT/d8" --min-api 24 --lib "$JAR" --output work/obj @work/cls.txt
 cp work/obj/classes.dex work/classes.dex
 
 cd work
@@ -63,10 +63,27 @@ else
   KPASS="sementara"
 fi
 
+# Tanda tangan v1 + v2 + v3 sekaligus.
+#   v1 wajib untuk Android lama, v2 untuk Android 7+, v3 untuk Android 9+.
+#   Kalau salah satu kosong, sebagian HP menolak memasang ("aplikasi tidak
+#   dapat dipasang"), dan Google Play Protect menandainya sebagai tidak sah.
 "$BT/apksigner" sign --ks rakit.keystore --ks-pass "pass:$SPASS" \
-  --key-pass "pass:$KPASS" --out "../out/${NAME}.apk" app.aligned.apk
+  --key-pass "pass:$KPASS" \
+  --v1-signing-enabled true --v2-signing-enabled true --v3-signing-enabled true \
+  --out "../out/${NAME}.apk" app.aligned.apk
 
 echo "--- verifikasi ---"
 "$BT/apksigner" verify --print-certs "../out/${NAME}.apk"
+echo "--- skema tanda tangan ---"
+"$BT/apksigner" verify --verbose "../out/${NAME}.apk" | grep -i 'scheme\|Verified using' || true
+
+# Cek nyata: targetSdk/minSdk yang tertanam + ada tidaknya penanda debug.
+echo "--- isi manifes ---"
+"$BT/aapt2" dump badging "../out/${NAME}.apk" | grep -i 'sdkVersion\|package:\|application-label' || true
+if "$BT/aapt2" dump xmltree "../out/${NAME}.apk" --file AndroidManifest.xml 2>/dev/null | grep -qi debuggable; then
+  echo "PERINGATAN: penanda debuggable ada -> Play Protect bisa menolak"
+else
+  echo "debuggable: tidak ada (baik)"
+fi
 ls -l ../out/
 rm -f rakit.keystore

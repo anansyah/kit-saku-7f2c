@@ -58,6 +58,7 @@
         </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/kotak_cari"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
@@ -99,6 +100,7 @@
     </LinearLayout>
 
     <HorizontalScrollView
+        android:id="@+id/baris_label_wadah"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/latar_lembut"

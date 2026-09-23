@@ -77,8 +77,10 @@ public class MainActivity extends Activity {
             judul.setTextColor(Tampilan.teks(gelap));
             cuplikan.setTextColor(Tampilan.teks2(gelap));
             waktu.setTextColor(Tampilan.pudar(gelap));
-            simpan.setTextColor(Tampilan.aksen(gelap));
+            simpan.setTextColor(Tampilan.aksenTeks(gelap));
             gambar.setBackgroundColor(Tampilan.permukaan(gelap));
+            label.setTextColor(Tampilan.aksenTeks(gelap));
+            label.setBackground(Tampilan.pil(gelap));
 
             judul.setText(b.judul);
             waktu.setText(b.waktuPendek());
@@ -145,6 +147,7 @@ public class MainActivity extends Activity {
 
         gelap = Tampilan.gelap(this);
         tombolTema.setText("Tema: " + Tampilan.namaMode(this));
+        warnai();
 
         adapter = new Adapter();
         daftar.setAdapter(adapter);
@@ -221,6 +224,49 @@ public class MainActivity extends Activity {
 
         pasangLabel();
         ambil();
+    }
+
+    /**
+     * Warnai SELURUH layar mengikuti tema. Tanpa ini, warna di layout XML
+     * (yang selalu gelap) tetap dipakai saat mode terang -> tampilan rusak:
+     * tulisan gelap di latar gelap, dan sebaliknya.
+     */
+    private void warnai() {
+        // akar & panel
+        findViewById(R.id.akar).setBackgroundColor(Tampilan.bg(gelap));
+        findViewById(R.id.kepala).setBackgroundColor(Tampilan.bg(gelap));
+        panelMuat.setBackgroundColor(Tampilan.bg(gelap));
+        status.setBackgroundColor(Tampilan.bg(gelap));
+        findViewById(R.id.baris_label).setBackgroundColor(Tampilan.bg2(gelap));
+        findViewById(R.id.baris_label_wadah).setBackgroundColor(Tampilan.bg2(gelap));
+        lebih.setBackgroundColor(Tampilan.bg2(gelap));
+
+        // teks
+        status.setTextColor(Tampilan.pudar(gelap));
+        teksMuat.setTextColor(Tampilan.pudar(gelap));
+        teksLebih.setTextColor(Tampilan.aksenTeks(gelap));
+        tombolTema.setTextColor(Tampilan.aksenTeks(gelap));
+        tombolTersimpan.setTextColor(Tampilan.teks2(gelap));
+        cari.setTextColor(Tampilan.teks(gelap));
+        cari.setHintTextColor(Tampilan.pudar(gelap));
+        ((TextView) findViewById(R.id.tombol_segar)).setTextColor(Tampilan.aksenTeks(gelap));
+
+        // kotak pencarian & daftar (pakai bentuk dari kode supaya warnanya ikut tema)
+        findViewById(R.id.kotak_cari).setBackground(
+                Tampilan.kotak(Tampilan.permukaan(gelap), Tampilan.garis(gelap), 10));
+        findViewById(R.id.tombol_tema).setBackground(
+                Tampilan.kotak(android.graphics.Color.TRANSPARENT, Tampilan.garis(gelap), 20));
+        daftar.setBackgroundColor(Tampilan.bg(gelap));
+        ((android.widget.ProgressBar) pemutar).getIndeterminateDrawable()
+                .setTint(Tampilan.aksen(gelap));
+        pemutarKecil.getIndeterminateDrawable().setTint(Tampilan.aksen(gelap));
+
+        // bilah atas & bawah Android ikut warna tema
+        getWindow().setStatusBarColor(Tampilan.bg(gelap));
+        getWindow().setNavigationBarColor(Tampilan.bg(gelap));
+
+        // palet label: pakai aksen sesuai mode
+        pasangLabel();
     }
 
     private void muatTersimpan() {

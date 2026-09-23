@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Eraai Daily News</string>
+    <string name="app_name">EraAIdailyNews</string>
     <string name="memuat">Memuat berita…</string>
     <string name="muat_lagi">Muat berita lain</string>
     <string name="sedang_memuat_lagi">Memuat berita lain…</string>

@@ -71,7 +71,7 @@ final class Gambar {
             c = (HttpURLConnection) new URL(url).openConnection();
             c.setConnectTimeout(12000);
             c.setReadTimeout(15000);
-            c.setRequestProperty("User-Agent", "EraaiNews/2.0 (Android)");
+            c.setRequestProperty("User-Agent", "EraAIdailyNews/2.3 (Android)");
             c.setInstanceFollowRedirects(true);
             if (c.getResponseCode() < 200 || c.getResponseCode() >= 300) return null;
             InputStream is = new BufferedInputStream(c.getInputStream(), 16384);

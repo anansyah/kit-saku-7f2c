@@ -46,19 +46,32 @@ public class ReaderActivity extends Activity {
 
         gelap = Tampilan.gelap(this);
 
+        // lapisi warna seluruh layar baca (layout XML selalu gelap)
+        findViewById(R.id.akar).setBackgroundColor(Tampilan.bg(gelap));
+        findViewById(R.id.kepala_reader).setBackgroundColor(Tampilan.bg2(gelap));
+        findViewById(R.id.kaki_reader).setBackgroundColor(Tampilan.bg2(gelap));
+        ((TextView) findViewById(R.id.tombol_ukuran)).setTextColor(Tampilan.teks2(gelap));
+        ((TextView) findViewById(R.id.tombol_bagikan)).setTextColor(Tampilan.teks2(gelap));
+        ((TextView) findViewById(R.id.tombol_browser)).setTextColor(Tampilan.teks2(gelap));
+        getWindow().setStatusBarColor(Tampilan.bg(gelap));
+        getWindow().setNavigationBarColor(Tampilan.bg(gelap));
+
         TextView labelSumber = findViewById(R.id.label_sumber);
         labelSumber.setText(judul == null ? getString(R.string.sumber) : judul);
         labelSumber.setTextColor(Tampilan.teks2(gelap));
 
         muat = findViewById(R.id.muat);
+        ((ProgressBar) muat).getIndeterminateDrawable().setTint(Tampilan.aksen(gelap));
+        ((ProgressBar) muat).getProgressDrawable().setColorFilter(
+                Tampilan.aksen(gelap), android.graphics.PorterDuff.Mode.SRC_IN);
         web = findViewById(R.id.web);
         setelanWeb(web);
         tombolSimpan = findViewById(R.id.tombol_simpan);
-        tombolSimpan.setTextColor(Tampilan.aksen(gelap));
+        tombolSimpan.setTextColor(Tampilan.aksenTeks(gelap));
         segarkanTombolSimpan();
 
         TextView tKembali = findViewById(R.id.tombol_kembali);
-        tKembali.setTextColor(Tampilan.aksen(gelap));
+        tKembali.setTextColor(Tampilan.aksenTeks(gelap));
         tKembali.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -79,7 +92,7 @@ public class ReaderActivity extends Activity {
                 Intent kirim = new Intent(Intent.ACTION_SEND);
                 kirim.setType("text/plain");
                 kirim.putExtra(Intent.EXTRA_TEXT,
-                        (judul == null ? "" : judul + "\n") + tautan + "\n\n— Eraai Daily News");
+                        (judul == null ? "" : judul + "\n") + tautan + "\n\n— EraAIdailyNews");
                 startActivity(Intent.createChooser(kirim, getString(R.string.berbagi)));
             }
         });

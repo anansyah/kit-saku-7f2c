@@ -58,6 +58,7 @@
     </FrameLayout>
 
     <LinearLayout
+        android:id="@+id/kaki_reader"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/latar_lembut"

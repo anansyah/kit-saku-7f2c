@@ -162,12 +162,12 @@ final class IsiArtikel {
      *  Warna mengikuti tema blog (gelap: latar #0B1220 aksen #F2B544). */
     static String bungkus(String judul, String badan, String gambar, String kredit,
                           int ukuran, String tautan, String label, boolean gelap) {
-        String bg = gelap ? "#0B1220" : "#F4F6FA";
-        String teks = gelap ? "#E8EDF6" : "#0E182B";
-        String teks2 = gelap ? "#B9C4D8" : "#33425C";
-        String pudar = gelap ? "#8D9CB5" : "#56667F";
-        String aksen = gelap ? "#F2B544" : "#E9A62A";
-        String garis = gelap ? "#24334F" : "#D3DBE8";
+        String bg = Tampilan.htmlBg(gelap);
+        String teks = Tampilan.htmlTeks(gelap);
+        String teks2 = Tampilan.htmlTeks2(gelap);
+        String pudar = Tampilan.htmlPudar(gelap);
+        String aksen = Tampilan.htmlAksenTeks(gelap);   // teks/tautan: di terang = #8a5200 (bukan emas)
+        String garis = Tampilan.htmlGaris(gelap);
         StringBuilder h = new StringBuilder();
         h.append("<!DOCTYPE html><html><head><meta charset=\"utf-8\">");
         h.append("<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">");
@@ -201,7 +201,7 @@ final class IsiArtikel {
         if (judul != null && judul.length() > 0) {
             h.append("<h1>").append(aman(judul)).append("</h1>");
         }
-        h.append("<div class=\"meta\">Eraai Daily News</div>");
+        h.append("<div class=\"meta\">EraAIdailyNews</div>");
         if (gambar != null && gambar.length() > 0) {
             h.append("<div class=\"gambar\"><img src=\"").append(gambar).append("\" alt=\"")
              .append(aman(judul)).append("\"></div>");

@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Warna mengikuti tema blog: nilai di Tampilan.java yang dipakai saat berjalan.
-         Nilai di sini = tema gelap (nilai awal sebelum kode mewarnai ulang). -->
+    <!-- Nilai awal (dipakai sebelum kode mewarnai ulang). Sama dengan tema gelap blog. -->
     <color name="merah">#C62828</color>
     <color name="merah_tua">#8E1B1B</color>
-    <color name="latar">#0B1220</color>
-    <color name="latar_lembut">#0E1729</color>
-    <color name="permukaan">#131E34</color>
-    <color name="teks">#E8EDF6</color>
-    <color name="teks2">#B9C4D8</color>
-    <color name="pudar">#8D9CB5</color>
-    <color name="garis">#24334F</color>
-    <color name="aksen">#F2B544</color>
-    <color name="kepala_teks">#E8EDF6</color>
-    <color name="kepala_sub">#B9C4D8</color>
+    <color name="latar">#0b1220</color>
+    <color name="latar_lembut">#0e1729</color>
+    <color name="permukaan">#131e34</color>
+    <color name="teks">#e8edf6</color>
+    <color name="teks2">#b9c4d8</color>
+    <color name="pudar">#8d9cb5</color>
+    <color name="garis">#24334f</color>
+    <color name="aksen">#f2b544</color>
+    <color name="kepala_teks">#e8edf6</color>
+    <color name="kepala_sub">#b9c4d8</color>
+    <color name="ikon_latar">#F5F6FA</color>
 </resources>
