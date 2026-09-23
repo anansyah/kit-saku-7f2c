@@ -109,8 +109,14 @@ final class ParseFeed {
                 Matcher mk = KREDIT.matcher(html);
                 if (mk.find()) b.kredit = mk.group(1);
                 b.cuplikan = bersih(html);
-                if (b.cuplikan.length() > 240) {
-                    b.cuplikan = b.cuplikan.substring(0, 240).trim() + "…";
+                // buang embel-embel kredit gambar dari awal cuplikan
+                b.cuplikan = b.cuplikan.replaceAll(
+                        "^(?:Gambar|Foto|Image|Photo)\\s*:[^.]*?\\.(?:jpg|jpeg|png|webp|gif|svg)\\s*", "");
+                b.cuplikan = b.cuplikan.replaceAll(
+                        "^(?:Gambar|Foto|Image|Photo)\\s*:[^—\\-]*[—\\-]\\s*", "");
+                b.cuplikan = b.cuplikan.trim();
+                if (b.cuplikan.length() > 200) {
+                    b.cuplikan = b.cuplikan.substring(0, 200).trim() + "…";
                 }
                 b.isi = html;
 

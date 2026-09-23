@@ -24,6 +24,15 @@ final class IsiArtikel {
     private static final Pattern KICKER =
             Pattern.compile("<[^>]*class=['\"][^'\"]*kicker[^'\"]*['\"][^>]*>([^<]{2,30})<",
                     Pattern.CASE_INSENSITIVE);
+    private static final Pattern WRAP_GAMBAR =
+            Pattern.compile("<div[^>]*class=['\"]gambar-berita['\"][^>]*>", Pattern.CASE_INSENSITIVE);
+    private static final Pattern DIV_KREDIT =
+            Pattern.compile("<div[^>]*class=['\"]kredit-gambar['\"][^>]*>.*?</div>",
+                    Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+    private static final Pattern TAG_IMG =
+            Pattern.compile("<img\\b[^>]*>", Pattern.CASE_INSENSITIVE);
+    private static final Pattern P_KOSONG =
+            Pattern.compile("<p>\\s*(?:<br\\s*/?>)?\\s*</p>", Pattern.CASE_INSENSITIVE);
 
     /** Badan artikel (HTML) dengan penyeimbang tag div. */
     static String ambil(String halaman) {
@@ -45,6 +54,60 @@ final class IsiArtikel {
         }
         int batas = Math.min(halaman.length(), awal + 60000);
         return halaman.substring(awal, batas);
+    }
+
+    /**
+     * Buang gambar utama dari badan artikel karena aplikasi sudah menampilkan
+     * gambar itu di bagian atas. Tanpa ini gambar tampil DUA KALI.
+     * Urutan kerja:
+     *   1) buang blok "gambar-berita" yang berisi gambar
+     *   2) buang gambar pertama yang masih tersisa (sebagian artikel
+     *      menaruh gambarnya di dalam paragraf biasa)
+     *   3) buang sisa wadah/baris kredit yang jadi kosong
+     */
+    static String bersihkan(String badan, boolean gambarDiAtas) {
+        if (badan == null) return null;
+        if (!gambarDiAtas) return badan;
+        String hasil = badan;
+
+        // 1) blok gambar-berita
+        Matcher w = WRAP_GAMBAR.matcher(hasil);
+        StringBuffer sb = new StringBuffer();
+        while (w.find()) {
+            int akhir = cariPenutupDiv(hasil, w.end());
+            if (akhir < 0) continue;
+            if (TAG_IMG.matcher(hasil.substring(w.end(), akhir)).find()) {
+                w.appendReplacement(sb, Matcher.quoteReplacement(""));
+            }
+        }
+        w.appendTail(sb);
+        hasil = sb.toString();
+
+        // 2) gambar pertama yang masih tersisa
+        Matcher g = TAG_IMG.matcher(hasil);
+        if (g.find()) {
+            hasil = hasil.substring(0, g.start()) + hasil.substring(g.end());
+        }
+
+        // 3) sisa wadah kosong
+        hasil = DIV_KREDIT.matcher(hasil).replaceAll("");
+        hasil = P_KOSONG.matcher(hasil).replaceAll("");
+        return hasil;
+    }
+
+    /** Posisi penutup div yang seimbang, mulai dari dalam sebuah div. */
+    private static int cariPenutupDiv(String s, int mulai) {
+        int kedalaman = 1;
+        Matcher d = DIV.matcher(s.substring(mulai));
+        while (d.find()) {
+            if ("/".equals(d.group(1))) {
+                kedalaman--;
+                if (kedalaman == 0) return mulai + d.start();
+            } else {
+                kedalaman++;
+            }
+        }
+        return -1;
     }
 
     static String gambar(String halaman) {
@@ -95,7 +158,7 @@ final class IsiArtikel {
                 .replaceAll("\\s+", " ").trim();
     }
 
-    /** Susun halaman baca: judul, label, gambar+kredit, isi, sumber. */
+    /** Susun halaman baca: label, judul, gambar + kredit, isi, sumber. */
     static String bungkus(String judul, String badan, String gambar, String kredit,
                           int ukuran, String tautan, String label) {
         StringBuilder h = new StringBuilder();
@@ -116,6 +179,7 @@ final class IsiArtikel {
         h.append("h2,h3{font-size:1.15em;margin:1.4em 0 .5em}");
         h.append("blockquote{border-left:3px solid #C62828;margin:1em 0;padding:0 0 0 14px;color:#444}");
         h.append("a{color:#C62828}");
+        h.append(".kredit-gambar{display:none}");
         h.append(".sumber{margin-top:26px;padding-top:14px;border-top:1px solid #eee;");
         h.append("color:#8a8a8a;font-size:.75em}");
         h.append("</style></head><body>");

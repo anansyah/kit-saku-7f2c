@@ -187,7 +187,9 @@ public class ReaderActivity extends Activity {
         gambarArtikel = IsiArtikel.gambar(isi);
         kreditArtikel = IsiArtikel.kredit(isi);
         labelArtikel = IsiArtikel.label(isi);
-        String html = IsiArtikel.bungkus(judul, badanArtikel, gambarArtikel,
+        // gambar ditampilkan terpisah di atas -> buang dari badan agar tidak dobel
+        String badan = IsiArtikel.bersihkan(badanArtikel, gambarArtikel != null);
+        String html = IsiArtikel.bungkus(judul, badan, gambarArtikel,
                 kreditArtikel, ukuran, tautan, labelArtikel);
         web.loadDataWithBaseURL(tautan, html, "text/html", "UTF-8", null);
     }
