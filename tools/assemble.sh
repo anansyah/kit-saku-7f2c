@@ -23,6 +23,12 @@ echo "platform : $PLAT (API $API)"
 echo "target   : API $TARGET (stabil)"
 echo "build    : $BT"
 
+# Periksa dulu: kesalahan escape/lambda/kurung menggagalkan javac jauh di ujung.
+# Lebih baik ketahuan di detik pertama daripada menunggu perakitan selesai.
+if [ -f tools/periksa_java.py ]; then
+  python3 tools/periksa_java.py src || { echo "PERIKSA GAGAL: perbaiki dulu"; exit 1; }
+fi
+
 NAME="${NAME:-EraaiDailyNews}"
 VVERSION="${VERSION_CODE:-1}"
 NVERSION="${VERSION_NAME:-1.0}"

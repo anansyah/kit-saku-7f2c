@@ -157,27 +157,34 @@ final class IsiArtikel {
      */
     static String teksBersih(String html) {
         if (html == null) return "";
-        String t = html;
-        // blok yang tidak layak dibaca
-        t = DIV_KREDIT.matcher(t).replaceAll(" ");
-        t = t.replaceAll("(?is)<div[^>]*class=[\"'][^\"']*(?:gambar-berita|sumber)[^\"']*[\"'][^>]*>.*?</div>", " ");
-        // ganti elemen blok jadi jeda supaya kalimat tidak menempel
-        t = t.replaceAll("(?i)</(p|h1|h2|h3|h4|li|blockquote|div)>", ". ");
-        t = t.replaceAll("(?i)<br\s*/?>", ". ");
+        String t = DIV_KREDIT.matcher(html).replaceAll(" ");
+        // jeda di batas blok supaya kalimat tidak menempel satu sama lain
+        t = t.replace("</p>", ". ").replace("</P>", ". ");
+        t = t.replace("</li>", ". ").replace("</LI>", ". ");
+        t = t.replace("</h2>", ". ").replace("</H2>", ". ");
+        t = t.replace("</h3>", ". ").replace("</H3>", ". ");
+        t = t.replace("</h4>", ". ").replace("</H4>", ". ");
+        t = t.replace("</blockquote>", ". ");
+        t = t.replace("</div>", ". ").replace("</DIV>", ". ");
+        t = t.replace("<br>", ". ").replace("<br/>", ". ").replace("<br />", ". ");
+        t = t.replace("<BR>", ". ").replace("<BR/>", ". ").replace("<BR />", ". ");
+        // buang gambar & seluruh tag
         t = TAG_IMG.matcher(t).replaceAll(" ");
         t = TAG.matcher(t).replaceAll(" ");
         // entitas yang lazim
-        t = t.replace("&#8212;", "—").replace("&#8211;", "–")
+        t = t.replace("&#8212;", "\u2014").replace("&#8211;", "\u2013")
              .replace("&#8217;", "'").replace("&#8216;", "'")
              .replace("&#8220;", "\"").replace("&#8221;", "\"")
-             .replace("&#8230;", "…").replace("&hellip;", "…")
+             .replace("&#8230;", "\u2026").replace("&hellip;", "\u2026")
              .replace("&nbsp;", " ").replace("&amp;", "&")
              .replace("&lt;", "<").replace("&gt;", ">")
              .replace("&#39;", "'").replace("&quot;", "\"");
-        // perbaiki jeda ganda
-        t = t.replaceAll("\s*\.\s*\.", ".").replaceAll("\.\s*\.", ".");
-        t = t.replaceAll("[ \t]+", " ").trim();
-        return t;
+        // rapikan spasi & titik ganda (tanpa regex)
+        while (t.indexOf("  ") >= 0) t = t.replace("  ", " ");
+        while (t.indexOf(". .") >= 0) t = t.replace(". .", ".");
+        while (t.indexOf("..") >= 0) t = t.replace("..", ".");
+        while (t.indexOf(" .") >= 0) t = t.replace(" .", ".");
+        return t.trim();
     }
 
     private static String rapikan(String t) {
