@@ -9,10 +9,18 @@ PLAT=$(ls -d "$SDK"/platforms/android-* 2>/dev/null | sort -V | tail -1)
 BT=$(ls -d "$SDK"/build-tools/* 2>/dev/null | sort -V | tail -1)
 [ -n "$PLAT" ] && [ -n "$BT" ] || { echo "platform/build-tools kosong"; ls "$SDK"; exit 1; }
 
+# pakai platform STABIL (bukan beta/pratinjau) supaya bisa dipasang di HP umum
+STABIL=$(ls -d "$SDK"/platforms/android-* 2>/dev/null | sed 's#.*/android-##' | grep -E '^[0-9]+$' | sort -n | tail -1)
+if [ -n "$STABIL" ] && [ -f "$SDK/platforms/android-$STABIL/android.jar" ]; then
+  PLAT="$SDK/platforms/android-$STABIL"
+fi
+
 JAR="$PLAT/android.jar"
 API=$(basename "$PLAT" | sed 's/android-//')
+TARGET="${TARGET_API:-$API}"
 echo "SDK      : $SDK"
 echo "platform : $PLAT (API $API)"
+echo "target   : API $TARGET (stabil)"
 echo "build    : $BT"
 
 NAME="${NAME:-EraaiDailyNews}"
@@ -23,7 +31,7 @@ rm -rf work out; mkdir -p work/gen work/classes work/obj out
 "$BT/aapt2" compile --dir res -o work/res.zip
 "$BT/aapt2" link -o work/base.apk \
   -I "$JAR" --manifest AndroidManifest.xml -R work/res.zip \
-  --java work/gen --min-sdk-version 21 --target-sdk-version "$API" \
+  --java work/gen --min-sdk-version 21 --target-sdk-version "$TARGET" \
   --version-code "$VVERSION" --version-name "$NVERSION" --auto-add-overlay
 
 find work/gen src -name '*.java' > work/sources.txt
